@@ -16,7 +16,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 import plotly.express as px
 
 
-
+from wordcloud import WordCloud
 
 import gensim
 import gensim.corpora as corpora
