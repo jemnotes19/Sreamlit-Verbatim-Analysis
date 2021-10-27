@@ -1,0 +1,27 @@
+Step 1: upgrade anaconda (or make sure it is up to date)
+python -m pip install --upgrade pip
+
+Step 2: update latest panda
+conda install -c anaconda pandas
+
+
+Step 3: update scipy (optional)
+
+
+Step 4: install nlp packages spacy
+conda install -c conda-forge spacy
+
+Step5: install gensim
+conda install -c anaconda gensim
+
+Step6: install textblob
+conda install -c conda-forge textblob
+
+Step7: install pyLDAvis
+conda install -c conda-forge pyldavis
+
+Step8: install plotly
+
+
+Step9: install streamlit
+conda install -c conda-forge streamlit
