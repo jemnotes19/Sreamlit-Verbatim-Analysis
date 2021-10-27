@@ -7,7 +7,7 @@ import streamlit as st
 import re
 
 import pandas as pd
-import base64
+#import base64
 from textblob import TextBlob
 
 from sklearn.feature_extraction.text import CountVectorizer
@@ -20,7 +20,7 @@ from wordcloud import WordCloud
 
 import gensim
 import gensim.corpora as corpora
-
+from gensim import matutils, models
 
 import scipy.sparse
 
@@ -198,7 +198,7 @@ def main():
             #st.write(file_data)   
             
             if data_sheet.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name)  
+                df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name, engine ="openpyxl")  
                 
                
             result = sentiment_analysis(df_raw, col_name)
@@ -219,8 +219,10 @@ def main():
                         data=csv,
                         file_name='Sentiment Analysis.csv',
                         mime='text/csv')
+                
                 #old hypelink code before streamlit added the download button    
                 #st.markdown(get_table_download_link_csv(result), unsafe_allow_html=True)
+                
             with col2:
                 pie_chart = px.pie(data_frame = summary, 
                    values = "count", 
@@ -249,9 +251,8 @@ def main():
 
         if data_sheet is not None:
             if data_sheet.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name) 
-            
-            
+                df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name, engine ="openpyxl") 
+           
             df_clean = clean_data(df_raw, col_name)
             
             if lemma_on:
@@ -305,8 +306,8 @@ def main():
                 
             if data_sheet is not None:
                 if data_sheet.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                    df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name)
-                    df_topics = pd.read_excel(topic_sheet, sheet_name = "Sheet1")
+                    df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name,engine ="openpyxl")
+                    df_topics = pd.read_excel(topic_sheet, sheet_name = "Sheet1",engine ="openpyxl")
                     
                     df_clean = clean_data(df_raw, col_name)
                     list_df = convertdf_to_dataword(df_clean, col_name)
@@ -367,7 +368,7 @@ def main():
             
         if data_sheet is not None:
             if data_sheet.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name)
+                df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name,engine ="openpyxl")
             
             clean_df = clean_data(df_raw, col_name)
             lem_df = clean_df.apply(lemmatization, args= [included_pos])
