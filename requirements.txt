@@ -9,3 +9,4 @@ pyLDAvis==3.3.1
 scikit_learn==1.0.1
 wordcloud==1.8.1
 openpyxl==3.0.5
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz
