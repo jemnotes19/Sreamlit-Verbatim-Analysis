@@ -21,7 +21,7 @@ Step7: install pyLDAvis
 conda install -c conda-forge pyldavis
 
 Step8: install plotly
-
+conda install -c plotly plotly
 
 Step9: install streamlit
 conda install -c conda-forge streamlit
