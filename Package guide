@@ -17,11 +17,20 @@ conda install -c anaconda gensim
 Step6: install textblob
 conda install -c conda-forge textblob
 
-Step7: install pyLDAvis
+step7: install wordcloud
+conda install -c conda-forge wordcloud
+
+Step8: install pyLDAvis
 conda install -c conda-forge pyldavis
 
-Step8: install plotly
+Step9: install plotly
 conda install -c plotly plotly
 
-Step9: install streamlit
+Step10: install streamlit
 conda install -c conda-forge streamlit
+
+Step11: install openpyxl
+conda install -c anaconda openpyxl
+
+issues with protobuf
+pip install --upgrade protobuf
