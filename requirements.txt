@@ -7,3 +7,4 @@ textblob==0.15.3
 spacy==2.3.3
 pyLDAvis==3.3.1
 scikit_learn==1.0.1
+wordcloud==1.8.1
