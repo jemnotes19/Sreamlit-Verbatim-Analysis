@@ -37,7 +37,6 @@ def main():
     
     
     st.set_page_config(layout="wide")
-    st.image('./Desktop/rx_new_logo.png')
 
     
     nav = st.sidebar.selectbox("Navigation", [ "Word Cloud", "Keyword Finder", "TextBlob Sentiment Analysis","Topic Modelling"])
