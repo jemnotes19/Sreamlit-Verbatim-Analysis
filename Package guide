@@ -34,3 +34,6 @@ conda install -c anaconda openpyxl
 
 issues with protobuf
 pip install --upgrade protobuf
+
+download en_core_web_sm for spacy
+python -m spacy download en_core_web_sm
