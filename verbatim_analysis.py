@@ -401,18 +401,19 @@ def main():
             else:
                 gram_df = lem_df
                 
-            dict_gram_df = pd.DataFrame.from_dict(dict_gram)
-            dict_gram_tdf = dict_gram_df.T.reset_index()
-            dict_gram_tdf.rename(columns = {dict_gram_tdf.columns[0]:bigram_check, dict_gram_tdf.columns[1]:'Count'},inplace =True)
+            if len(dict_gram) >0:    
+                dict_gram_df = pd.DataFrame.from_dict(dict_gram)
+                dict_gram_tdf = dict_gram_df.T.reset_index()
+                dict_gram_tdf.rename(columns = {dict_gram_tdf.columns[0]:bigram_check, dict_gram_tdf.columns[1]:'Count'},inplace =True)
+
+                bar_chart = px.bar(
+                        data_frame = dict_gram_tdf,
+                        x = 'Count',
+                        y = bigram_check,
+                        orientation = 'h')
             
-            bar_chart = px.bar(
-                    data_frame = dict_gram_tdf,
-                    x = 'Count',
-                    y = bigram_check,
-                    orientation = 'h')
-            
-            with col2:
-                st.plotly_chart(bar_chart)
+                with col2:
+                    st.plotly_chart(bar_chart)
             
             
             cv = CountVectorizer(stop_words='english')
