@@ -240,7 +240,7 @@ def main():
     if nav == "Word Cloud":
         st.title('Word Cloud')
         
-        col1, col2 = st.columns([1,2])
+        col1, mid, col2 = st.columns([2,1,3])
         
         with col1:
             
