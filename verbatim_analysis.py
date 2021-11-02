@@ -110,9 +110,12 @@ def main():
                         if each_doc not in result_dict[topics]:
                             result_dict[topics].append(" ".join(each_doc))
                         break
-                        
+        
+        response_in_dict=[]
+        for each in result_dict.values():
+            response_in_dict+=each 
         for docs in data_list:
-            if " ".join(docs) not in result_dict.values():
+            if " ".join(docs) not in response_in_dict:
                 other_list.append(" ".join(docs))
     
         result_dict["Other"] = other_list
@@ -190,7 +193,7 @@ def main():
             return process_data(clean_data(df, col_name), col_name)
         
         
-        if data_sheet is not None:
+        if data_sheet is not None and submit_button:
             #file_data = { "file_type": data_sheet.type, 'format':data_sheet.__format__}
             #checks the file type of the uploaded file
             # Excel sheets are typed as "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -258,8 +261,9 @@ def main():
             if lemma_on:
                 df_clean = df_clean.apply(lemmatization)
             
-            st.subheader('Cleaned Responses')
-            st.write(df_clean)
+            #temporarily removed while figuring out how to display wrapped text in a dataframe
+            #st.subheader('Cleaned Responses')
+            #st.write(df_clean)
             
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(df_clean[col_name])
@@ -275,18 +279,36 @@ def main():
             
             
             df_topwords = pd.DataFrame( topword_list, columns = ["Word", "Frequency"])
-            df_topwords  = df_topwords.style.hide_index()
             
+            with col2:
+                st.subheader('Word Frequency')
+                bar_chart = px.bar(
+                            data_frame = df_topwords,
+                            x = 'Frequency',
+                            y = 'Word',
+                            orientation = 'h')
+                bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
+                #bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+                bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
+                st.plotly_chart(bar_chart)
             
-            st.subheader('Word Frequency')
-            st.write(df_topwords)
+            with col1:
+                color_editor = st.expander("Edit WordCloud Colors")
+                with color_editor:
+                    bg_color = st.color_picker("Pick a background color", "#FFFFFF")   
+                    c_map = st.selectbox("Pick a colormap", ("viridis","plasma","inferno","magma","cividis"))                          
+                
+            def gen_wordcloud(word_dict, bg_color ="#FFFFFF", c_map ="viridis"):
+                return WordCloud(background_color = bg_color,
+                               colormap=c_map).fit_words(word_dict)
             
-            my_placeholder = st.empty()
-            my_placeholder.text('')
+            wc = gen_wordcloud(topword_dict,bg_color,c_map)
             
-            wc = WordCloud(background_color = 'white').fit_words(topword_dict)
-            st.image(wc.to_array())
-            
+            with col2:
+                st.subheader('Word Cloud')
+                st.markdown('#')
+                st.image(wc.to_array())    
+                
             # wc_stopword = st.multiselect('Multiselect', [x[0] for x in topword_list])
     
     if nav == "Keyword Finder":
@@ -304,7 +326,7 @@ def main():
                                                help = "Please upload an excel file with header columns and on Sheet1")
                 submit_button = st.form_submit_button(label='Process Data')
                 
-            if data_sheet is not None:
+            if data_sheet is not None and submit_button:
                 if data_sheet.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                     df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name,engine ="openpyxl")
                     df_topics = pd.read_excel(topic_sheet, sheet_name = "Sheet1",engine ="openpyxl")
@@ -366,7 +388,7 @@ def main():
                 
                 submit_data = st.form_submit_button(label='Process Data')
             
-        if data_sheet is not None:
+        if data_sheet is not None and submit_data:
             if data_sheet.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                 df_raw = pd.read_excel(data_sheet, sheet_name = excel_sheet_name,engine ="openpyxl")
             
