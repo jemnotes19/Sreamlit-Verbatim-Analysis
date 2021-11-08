@@ -311,7 +311,7 @@ def main():
             
             data_words = convertdf_to_dataword(df_clean, col_name)
             if ref_model_check:
-                pop_data_df = pd.read_pickle("compressed_all_pop_verbatims.pickle", compression = "zip")
+                pop_data_df = pd.read_csv("pop_ref_df.csv", compression = "zip")
                 clean_pop_df = clean_data(pop_data_df, "Verbatims")
                 add_data = df_clean[col_name].to_frame(name="Verbatims")
                 combined_ref_df = pd.concat([clean_pop_df,add_data]) 
@@ -488,7 +488,7 @@ def main():
             data_words = convertdf_to_dataword(lem_df, col_name)
         
             if ref_model_check:
-                pop_data_df = pd.read_pickle("compressed_all_pop_verbatims.pickle", compression = "zip")
+                pop_data_df = pd.read_csv("pop_ref_df.csv", compression = "zip")
                 clean_pop_df = clean_data(pop_data_df, "Verbatims")
                 add_data = df_clean[col_name].to_frame(name="Verbatims")
                 combined_ref_df = pd.concat([clean_pop_df,add_data]) 
