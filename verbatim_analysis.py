@@ -65,7 +65,7 @@ def main():
         
         return df_clean
         
-    def lemmatization(texts, allowed_postags = ["NOUN","ADJ","VERB","ADV"]):
+    def lemmatization(texts, allowed_postags = ["PROPN","NOUN","ADJ","VERB","ADV"]):
         nlp = spacy.load("en_core_web_sm", disable =["parser","ner"])
         texts_out = []
         for text in texts:
@@ -73,14 +73,17 @@ def main():
             new_text =[]
             for token in doc:
                 if token.pos_ in allowed_postags:
-                    new_text.append(token.lemma_)
+                    if token.pos_ == "PROPN":
+                        new_text.append(str(token))
+                    else:
+                        new_text.append(token.lemma_)
             final = " ".join(new_text)
             texts_out.append(final)
         return texts_out
     
     def convertdf_to_dataword(input_df, col_name):
         datalist = input_df[col_name].tolist()
-        output = [re.sub(r"[^\w]", " ",  x).split() for x in datalist]
+        output = [re.sub(r"[^\w]", " ",  str(x)).split() for x in datalist]
         return output
     
     def collect_bigrams(input_list):
@@ -120,6 +123,36 @@ def main():
     
         result_dict["Other"] = other_list
         return result_dict
+    
+    def bigram_model(ref_data, data_words, ngram_check="bigram", min=5, thresh=50):
+        
+        bigrams_phrases = gensim.models.Phrases(ref_data, min_count= min, threshold = thresh)
+        trigrams_phrases = gensim.models.Phrases(bigrams_phrases[ref_data], threshold= thresh)
+    
+        bigram = gensim.models.phrases.Phraser(bigrams_phrases)
+        trigram = gensim.models.phrases.Phraser(trigrams_phrases)
+    
+        def make_bigram(texts): 
+            return [bigram[doc] for doc in texts]
+    
+        def make_trigram(texts):
+            return [trigram[bigram[doc]] for doc in texts]
+        
+        data_bigrams = make_bigram(data_words)
+        data_bigrams_trigrams = make_trigram(data_bigrams)
+        
+        if ngram_check == "Bigram":
+            dict_gram = collect_bigrams(data_bigrams)
+            gram_df = list_to_df(data_bigrams, col_name)
+            
+        elif ngram_check == "Trigram":
+            dict_gram = collect_bigrams(data_bigrams_trigrams)
+            gram_df = list_to_df(data_bigrams_trigrams, col_name)
+        
+        else:
+            gram_df = lem_df
+
+        return (gram_df,dict_gram)
     
     from sklearn.feature_extraction import text 
     def remove_stopwords(doc):
@@ -244,12 +277,23 @@ def main():
         
         with col1:
             
+            ref_model_check = False
+            
             with st.form(key='my_form'):
                 data_sheet = st.file_uploader('File uploader', type = ['xlsx'])
                 excel_sheet_name = st.text_input("Please enter sheet name here")
                 col_name = st.text_input('Please enter column name')
                 topword_count = st.slider('Number of Top Words', min_value=1, max_value=30)
                 lemma_on = st.checkbox('Apply Lemmatization')
+                ngram_editor = st.expander("Adjust n-gram model")
+                with ngram_editor:
+                    bigram_check = st.radio("Choose an n-gram model",("Bigram","Trigram"))
+                    ref_model_check = st.checkbox("Use pop show reference data",
+                                                  help = "This adds previous verbatims from pop shows to your current data set. Warning may cause the model to run slower due to its size")
+                    ngram_hp_n = st.number_input("Adjust the minimum count threshold",
+                                                 value = 5)
+                    ngram_hp_score = st.number_input("Adjust the scoring threshold",
+                                                     value =100)
                 submit_button = st.form_submit_button(label='Process Data')
 
         if data_sheet is not None:
@@ -264,6 +308,30 @@ def main():
             #temporarily removed while figuring out how to display wrapped text in a dataframe
             #st.subheader('Cleaned Responses')
             #st.write(df_clean)
+            
+            data_words = convertdf_to_dataword(df_clean, col_name)
+            if ref_model_check:
+                pop_data_df = pd.read_pickle("compressed_all_pop_verbatims.pickle", compression = "zip")
+                clean_pop_df = clean_data(pop_data_df, "Verbatims")
+                add_data = df_clean[col_name].to_frame(name="Verbatims")
+                combined_ref_df = pd.concat([clean_pop_df,add_data]) 
+                pop_ref_data = convertdf_to_dataword(combined_ref_df, "Verbatims")   
+            else:
+                pop_ref_data = data_words
+            
+            gram_df, dict_gram = bigram_model(pop_ref_data,data_words,bigram_check,ngram_hp_n,ngram_hp_score)
+            
+            if len(dict_gram)>0:
+                dict_gram_df = pd.DataFrame.from_dict(dict_gram)
+                dict_gram_tdf = dict_gram_df.T.reset_index()
+                dict_gram_tdf.rename(columns = {dict_gram_tdf.columns[0]:bigram_check, dict_gram_tdf.columns[1]:'Count'},inplace =True)
+                
+                bigram_bar_chart = px.bar(
+                        data_frame = dict_gram_tdf,
+                        x = 'Count',
+                        y = bigram_check,
+                        orientation = 'h')
+            
             
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(df_clean[col_name])
@@ -310,7 +378,17 @@ def main():
                 st.image(wc.to_array())    
                 
             # wc_stopword = st.multiselect('Multiselect', [x[0] for x in topword_list])
-    
+            
+            with col1:
+                if len(dict_gram)>0:
+                    bigram_bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
+                    bigram_bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
+                    bigram_bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+                    
+                    st.markdown('#')
+                    st.subheader(bigram_check+" "+ "Frequency")
+                    st.plotly_chart(bigram_bar_chart)
+                    
     if nav == "Keyword Finder":
         st.title('Keyword Finder')
         
@@ -370,6 +448,9 @@ def main():
         
         
         with col1:
+            
+            ref_model_check = False
+            
             with st.form(key='my_form'):
                 data_sheet = st.file_uploader('File uploader', 
                                               type = ['xlsx'], 
@@ -382,7 +463,16 @@ def main():
                         ['Proper Noun', 'Noun', 'Verb', 'Adjective', "Adverb"],
                         ['Proper Noun', 'Noun', 'Verb', 'Adjective', "Adverb"])
                 included_pos = [pos_tag_dict[x] for x in pos_tags]
-                bigram_check = st.radio("Choose an n-gram model",("Bigram","Trigram"))
+                
+                ngram_editor = st.expander("Adjust n-gram model")
+                with ngram_editor:
+                    bigram_check = st.radio("Choose an n-gram model",("Bigram","Trigram"))
+                    ref_model_check = st.checkbox("Use pop show reference data",
+                                                  help = "This adds previous verbatims from pop shows to your current data set. Warning may cause the model to run slower due to its size")
+                    ngram_hp_n = st.number_input("Adjust the minimum count threshold",
+                                                 value = 5)
+                    ngram_hp_score = st.number_input("Adjust the scoring threshold",
+                                                     value =100)
                 
                 topic_count = st.slider('Number of Topics', min_value=2, max_value=15)
                 
@@ -396,33 +486,18 @@ def main():
             lem_df = clean_df.apply(lemmatization, args= [included_pos])
     
             data_words = convertdf_to_dataword(lem_df, col_name)
-            
-            bigrams_phrases = gensim.models.Phrases(data_words, min_count=5, threshold = 50)
-            trigrams_phrases = gensim.models.Phrases(bigrams_phrases[data_words], threshold=50)
-
-            bigram = gensim.models.phrases.Phraser(bigrams_phrases)
-            trigram = gensim.models.phrases.Phraser(trigrams_phrases)
-
-            def make_bigram(texts): 
-                return [bigram[doc] for doc in texts]
-
-            def make_trigram(texts):
-                return [trigram[bigram[doc]] for doc in texts]
-            
-            data_bigrams = make_bigram(data_words)
-            data_bigrams_trigrams = make_trigram(data_bigrams)
-            
-            if bigram_check == "Bigram":
-                dict_gram = collect_bigrams(data_bigrams)
-                gram_df = list_to_df(data_bigrams, col_name)
-                
-            elif bigram_check == "Trigram":
-                dict_gram = collect_bigrams(data_bigrams_trigrams)
-                gram_df = list_to_df(data_bigrams_trigrams, col_name)
-            
+        
+            if ref_model_check:
+                pop_data_df = pd.read_pickle("compressed_all_pop_verbatims.pickle", compression = "zip")
+                clean_pop_df = clean_data(pop_data_df, "Verbatims")
+                add_data = df_clean[col_name].to_frame(name="Verbatims")
+                combined_ref_df = pd.concat([clean_pop_df,add_data]) 
+                pop_ref_data = convertdf_to_dataword(combined_ref_df, "Verbatims")   
             else:
-                gram_df = lem_df
-                
+                pop_ref_data = data_words
+            
+            gram_df, dict_gram = bigram_model(pop_ref_data,data_words,bigram_check,ngram_hp_n,ngram_hp_score)
+            
             if len(dict_gram) >0:    
                 dict_gram_df = pd.DataFrame.from_dict(dict_gram)
                 dict_gram_tdf = dict_gram_df.T.reset_index()
@@ -441,7 +516,7 @@ def main():
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(gram_df[col_name])
             data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names())
-            data_dtm.index = lem_df[col_name]
+            data_dtm.index = gram_df[col_name]
             
             tdm = data_dtm.transpose()
             sparse_counts = scipy.sparse.csr_matrix(tdm)
