@@ -490,7 +490,7 @@ def main():
             if ref_model_check:
                 pop_data_df = pd.read_csv("pop_ref_df.csv", compression = "zip")
                 clean_pop_df = clean_data(pop_data_df, "Verbatims")
-                add_data = df_clean[col_name].to_frame(name="Verbatims")
+                add_data = lem_df[col_name].to_frame(name="Verbatims")
                 combined_ref_df = pd.concat([clean_pop_df,add_data]) 
                 pop_ref_data = convertdf_to_dataword(combined_ref_df, "Verbatims")   
             else:
