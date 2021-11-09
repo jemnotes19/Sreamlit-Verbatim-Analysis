@@ -336,7 +336,7 @@ def main():
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(gram_df[col_name])
             data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names())
-            data_dtm.index = df_clean[col_name]
+            data_dtm.index = gram_df[col_name]
             
             top_dict = {}
             for c in data_dtm.columns:
