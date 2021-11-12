@@ -508,10 +508,13 @@ def main():
                         x = 'Count',
                         y = bigram_check,
                         orientation = 'h')
-            
+                bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
+                #bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+                bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
+                
                 with col2:
                     st.plotly_chart(bar_chart)
-            
+                    
             
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(gram_df[col_name])
