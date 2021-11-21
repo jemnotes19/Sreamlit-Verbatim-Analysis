@@ -273,7 +273,7 @@ def main():
     if nav == "Word Cloud":
         st.title('Word Cloud')
         
-        col1, mid, col2 = st.columns([2,1,2])
+        col1, mid, col2 = st.columns([3,1,4])
         
         with col1:
             
@@ -357,7 +357,8 @@ def main():
                             orientation = 'h')
                 bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
                 #bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
-                bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
+                bar_chart.update_layout( yaxis={'categoryorder':'total ascending'},
+                                       yaxis_dtick = 1)
                 st.plotly_chart(bar_chart)
             
             with col1:
@@ -383,7 +384,9 @@ def main():
                 if len(dict_gram)>0:
                     bigram_bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
                     bigram_bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
-                    bigram_bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+                    bigram_bar_chart.update_layout(uniformtext_minsize=8, 
+                                                   uniformtext_mode='hide',
+                                                   yaxis_dtick = 1)
                     
                     st.markdown('#')
                     st.subheader(bigram_check+" "+ "Frequency")
@@ -438,7 +441,8 @@ def main():
                             title = 'Topic Frequency')
                         bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
                         bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
-                        bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
+                        bar_chart.update_layout(yaxis={'categoryorder':'total ascending'},
+                                                yaxis_dtick = 1)
                         st.plotly_chart(bar_chart)
         
     if nav == "Topic Modelling":
@@ -510,7 +514,8 @@ def main():
                         orientation = 'h')
                 bar_chart.update_traces(texttemplate='%{x:0s}', textposition='outside')
                 #bar_chart.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
-                bar_chart.update_layout( yaxis={'categoryorder':'total ascending'})
+                bar_chart.update_layout(yaxis={'categoryorder':'total ascending'},
+                                        yaxis_dtick = 1)
                 
                 with col2:
                     st.plotly_chart(bar_chart)
