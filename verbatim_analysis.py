@@ -508,7 +508,7 @@ def main():
                 dict_gram_tdf.rename(columns = {dict_gram_tdf.columns[0]:bigram_check, dict_gram_tdf.columns[1]:'Count'},inplace =True)
 
                 bar_chart = px.bar(
-                        data_frame = dict_gram_tdf,
+                        data_frame = dict_gram_tdf[:29],
                         x = 'Count',
                         y = bigram_check,
                         orientation = 'h')
