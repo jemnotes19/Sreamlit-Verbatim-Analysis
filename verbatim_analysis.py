@@ -335,7 +335,7 @@ def main():
             
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(gram_df[col_name])
-            data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names())
+            data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names_out())
             data_dtm.index = gram_df[col_name]
             
             top_dict = {}
@@ -523,7 +523,7 @@ def main():
             
             cv = CountVectorizer(stop_words='english')
             data_cv = cv.fit_transform(gram_df[col_name])
-            data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names())
+            data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names_out())
             data_dtm.index = gram_df[col_name]
             
             tdm = data_dtm.transpose()
@@ -554,7 +554,3 @@ def main():
 if __name__ == '__main__':
     main()
 # In[ ]:
-
-
-
-
